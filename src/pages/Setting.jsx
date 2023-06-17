@@ -10,11 +10,11 @@ import Cropper from "react-cropper";
 import { getAuth, updateProfile, signOut, updatePassword, signInWithEmailAndPassword } from "firebase/auth";
 import { getStorage, ref, uploadString, getDownloadURL, } from "firebase/storage";
 import { Rings } from 'react-loader-spinner'
-import { getDatabase, update, ref as dref } from "firebase/database";
+import { getDatabase, update, ref as dref, remove } from "firebase/database";
 import { useDispatch, useSelector } from 'react-redux'
 import { userLoginInfo } from '../slices/userSlice'
 import { useNavigate } from 'react-router-dom'
-import { ToastContainer,toast } from 'react-toastify'
+import { ToastContainer, toast } from 'react-toastify'
 
 
 
@@ -39,6 +39,8 @@ const Setting = () => {
     let [newPassword, setNewPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [errorMessage, setErrorMessage] = useState('');
+
+    const [accountDeleteModal, setAccoutDeleteModal] = useState(false)
 
     const onChange = (e) => {
         e.preventDefault();
@@ -67,7 +69,7 @@ const Setting = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
-            });
+        });
         if (typeof cropperRef.current?.cropper !== "undefined") {
             const storageRef = ref(storage, auth.currentUser.uid);
             setCropData(cropperRef.current?.cropper.getCroppedCanvas().toDataURL());
@@ -93,8 +95,8 @@ const Setting = () => {
                                 draggable: true,
                                 progress: undefined,
                                 theme: "light",
-                                });
-                      
+                            });
+
 
                         })
                     })
@@ -146,6 +148,23 @@ const Setting = () => {
 
 
 
+    }
+
+    let handleAccountDelete=()=>{
+        toast.success('Account Deleted Successfull', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+        });
+
+        remove(dref(db, 'users/' + auth.currentUser.uid)).then(()=>{
+            navigate('/')
+        })
     }
 
     return (
@@ -356,7 +375,7 @@ const Setting = () => {
                                 </div>
                             </div>
                             :
-                            <div className=' w-[86%]  h-[1080px] p-10'>
+                            <div className=' w-[86%]  h-[1080px] p-10 relative'>
                                 <div className="flex  gap-x-4 ">
                                     <div className='w-[592px]  shadow-lg p-5  rounded-lg'>
                                         <h4 className='font-primary text-lg font-semibold text-primary  '>Profile Setting</h4>
@@ -403,15 +422,27 @@ const Setting = () => {
                                             </div>
                                             <div className="flex gap-x-4  items-center mt-7">
                                                 <AiFillDelete className='text-2xl' />
-                                                <h4 className='font-primary text-primary text-lg '>Delete Account</h4>
+                                                <button onClick={() => setAccoutDeleteModal(true)} className='font-primary text-primary text-lg '>Delete Account</button>
                                             </div>
                                         </div>
                                     </div>
 
                                 </div>
+                                {accountDeleteModal&&
+                                <div className='w-full h-screen bg-[rgba(0,0,0,.4)] absolute  top-0 left-0 flex justify-center items-center '>
+                                    <div className='p-5 bg-white rounded-lg'>
+                                      
+                                        <h2 className=' font-primary text-lg font-semibold text-primary mb-4  '>Are You Sure ? </h2>
+                                        <button onClick={handleAccountDelete} className='font-primary text-sm py-2 px-4  bg-primary text-white '> Yes </button>
+                                        <button onClick={()=>setAccoutDeleteModal(false)} className='font-primary text-sm py-2 px-4  bg-red-500 text-white ml-2 '> No  </button>
+                                    </div>
+                                </div>
+                                
+                                }
                             </div>
 
             }
+
 
         </div>
     )
