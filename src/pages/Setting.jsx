@@ -168,7 +168,7 @@ const Setting = () => {
     }
 
     return (
-        <div className='w-full flex  justify-between'>
+        <div className='w-full flex  '>
             <ToastContainer
                 position="top-right"
                 autoClose={5000}

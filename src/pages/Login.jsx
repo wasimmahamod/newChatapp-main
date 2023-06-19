@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { userLoginInfo } from '../slices/userSlice';
-import { getAuth, signInWithEmailAndPassword, } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { Rings } from 'react-loader-spinner'
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -11,13 +11,24 @@ import { ToastContainer, toast } from 'react-toastify';
 
 const Login = () => {
   const auth = getAuth();
-  let dispatch= useDispatch()
-  let navigate =useNavigate()
+  let dispatch = useDispatch()
+  let navigate = useNavigate()
   let [email, setEmail] = useState('')
   let [password, setPassword] = useState('')
   let [emailerr, setEmailerr] = useState('')
   let [passworderr, setPassworderr] = useState('')
   let [loader, setLoader] = useState(false)
+  let [verify, setVerify] = useState(false)
+
+  console.log(auth.currentUser)
+  onAuthStateChanged(auth, (user) => {
+    if (user.emailVerified) {
+      setVerify(true)
+      dispatch(userLoginInfo(user))
+      localStorage.setItem('userInfo', JSON.stringify(user))
+    } else {
+    }
+  });
 
   let handleEmail = (e) => {
     setEmail(e.target.value)
@@ -47,14 +58,14 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
-            });
-            dispatch(userLoginInfo(user.user))
-            localStorage.setItem('userInfo', JSON.stringify(user.user))
-        }).then(()=>{
+          });
+          dispatch(userLoginInfo(user.user))
+          localStorage.setItem('userInfo', JSON.stringify(user.user))
+        }).then(() => {
           setLoader(true)
           setTimeout(() => {
             navigate('/home')
-            
+
           }, 2000);
         })
         .catch((error) => {
@@ -67,11 +78,11 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
-            });
-          if(error.code.includes('auth/wrong-password')){
+          });
+          if (error.code.includes('auth/wrong-password')) {
             setPassworderr("wrong Password ")
           }
-          if(error.code.includes('auth/user-not-found')){
+          if (error.code.includes('auth/user-not-found')) {
             setEmailerr("Email not Found  ")
           }
           console.log(error)
@@ -82,20 +93,21 @@ const Login = () => {
 
 
   return (
+    <div>
     <div className='flex '>
       <ToastContainer
-position="top-right"
-autoClose={5000}
-hideProgressBar={false}
-newestOnTop={false}
-closeOnClick
-rtl={false}
-pauseOnFocusLoss
-draggable
-pauseOnHover
-theme="light"
-/>
-{/* Same as */}
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      {/* Same as */}
       <div className=' md:w-2/4 lg:flex ml-6 '>
         <div className='mt-[315px] '>
           <h1 className=' font-primary text-primary text-3xl font-bold'>Welcome To Chatt.</h1>
@@ -118,19 +130,19 @@ theme="light"
           </div>
           <div className='w-full lg:w-[492px] '>
 
-          {loader ?
-            <div className='w-full flex justify-center'>
-              <Rings
-                height="80"
-                width="80"
-                radius="9"
-                color='green'
-                ariaLabel='three-dots-loading'
-                wrapperStyle
-                wrapperClass
-              />
+            {loader ?
+              <div className='w-full flex justify-center'>
+                <Rings
+                  height="80"
+                  width="80"
+                  radius="9"
+                  color='green'
+                  ariaLabel='three-dots-loading'
+                  wrapperStyle
+                  wrapperClass
+                />
 
-            </div>
+              </div>
               :
 
               <button onClick={handleSubmit} className='font-primary font-semibold text-white text-lg bg-primary  w-full py-3 mt-5 rounded-md'>Login</button>
@@ -158,6 +170,8 @@ theme="light"
         <img className='hidden sm:block w-full h-full object-cover' src="images/login.png" />
         <div className='w-full h-full  absolute top-0 left-0 bg-[rgba(0,0,0,.4)]  '></div>
       </div>
+
+    </div>
 
     </div>
   )

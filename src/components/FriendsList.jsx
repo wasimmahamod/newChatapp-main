@@ -38,7 +38,7 @@ const FriendsList = () => {
        blockby:item.sendername,
        blockbyid:item.senderid,
        blockbyimg:item.senderimg,
-       blockbyemail:item.sernderemail,
+       blockbyemail:item.senderemail,
       }).then(()=>{
         remove(ref(db, 'friend/'+item.id))
       })
